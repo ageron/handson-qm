@@ -149,7 +149,7 @@ This is the key insight behind the **shooting method**: only for special values 
 #%%
 # Scan E and record phi at a fixed point in the forbidden region
 x_probe = 5.0
-E_scan = np.linspace(0.1, 12.0, 500)
+E_scan = np.linspace(-2, 14.0, 400)
 phi_at_probe = np.zeros(len(E_scan))
 
 for i, E in enumerate(E_scan):
@@ -162,8 +162,9 @@ for i, E in enumerate(E_scan):
     )
     phi_at_probe[i] = sol.y[0, 0]
 
-# Normalize for display: divide by the envelope to see the sign changes
-# The raw values span many orders of magnitude, so we plot the sign-preserving log
+# The raw values span many orders of magnitude, so we use a sign-preserving
+# log scale: sign(phi) * log10(1 + |phi|). This compresses the huge
+# divergences while keeping the zero crossings clearly visible.
 phi_signed_log = np.sign(phi_at_probe) * np.log10(1 + np.abs(phi_at_probe))
 
 fig, ax = plt.subplots(figsize=(10, 5))
@@ -175,5 +176,31 @@ ax.set_title(f'Solution at x = {x_probe} as a function of energy')
 ax.grid(True, alpha=0.3)
 plt.tight_layout()
 plt.show()
+
+# Find and print the zero crossings
+sign_changes = np.where(np.diff(np.sign(phi_at_probe)))[0]
+print("Zero crossings (eigenvalue estimates):")
+for idx in sign_changes:
+    E_cross = 0.5 * (E_scan[idx] + E_scan[idx + 1])
+    print(f"  E ~ {E_cross:.2f}")
+
+#%%
+r"""
+## Reading the Plot
+
+This is *not* a wave function — it's the value of the wave function at a single fixed point $x = 5$, deep in the classically forbidden region, plotted as a function of the energy parameter $E$ that we feed into the ODE. For each $E$, we integrated the full ODE from left to right and recorded where $\phi$ ended up at $x = 5$. The signed-log scale compresses the enormous range of values so we can see what's going on.
+
+The pattern is striking. For most energies, the solution has diverged wildly by the time it reaches $x = 5$ — either to hugely positive or hugely negative values. But at certain special energies, the curve crosses zero. At those energies, the solution happens to pass through zero at $x = 5$ instead of diverging.
+
+Now imagine pushing the probe point further out — to $x = 6$, $x = 10$, $x = 100$. The divergences get exponentially worse (the growing exponential $e^{+\kappa x}$ has more room to grow), but the zero crossings stay in the same place. That's the crucial point: at those special energies, the solution doesn't just happen to be small at one particular $x$ — it actually *decays* in the forbidden region. No matter how far out you look, it stays well-behaved.
+
+These are the energies where the ODE has a unique solution (up to normalization) that doesn't blow up — a solution that is square-integrable, that lives in $L^2$. In other words: a normalizable wave function, a physically meaningful quantum state. These are the **energy eigenstates** $|\phi_n\rangle$ with eigenvalues $E_n$, and we've just located them by watching where the divergence changes sign.
+
+## A Ground State, but No Ceiling
+
+Look at the left side of the plot: below the first zero crossing ($E \approx 0.51$), $\phi(x=5)$ stays positive and enormous — it never crosses zero again. No matter how low you make $E$, the solution always diverges the same way. There is a **lowest eigenvalue** (the ground state energy), and no eigenstate below it.
+
+On the right side, the crossings keep coming. As $E$ increases the classically allowed region gets wider, allowing more oscillations in $\phi(x)$ before it hits the forbidden region. There is no upper bound — the spectrum extends to infinity. This is a general feature of confining potentials: a discrete, infinite ladder of energy levels with a bottom rung but no top.
+"""
 
 #%%
