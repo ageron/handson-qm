@@ -1,5 +1,5 @@
 #%%
-"""
+r"""
 # Beyond the Harmonic Oscillator: Anharmonicity and Dirac Notation
 
 In the first notebook we simulated a quantum particle in a harmonic potential
@@ -25,7 +25,7 @@ something more abstract.
 """
 
 #%%
-"""
+r"""
 ## Dirac Notation: States Without Coordinates
 
 ### The Problem with $\psi(x)$
@@ -97,7 +97,7 @@ any bra-ket expression and you recover the position representation.
 """
 
 #%%
-"""
+r"""
 ## From Continuous to Discrete: What Our Grid Really Means
 
 In Notebook 1, we discretized space onto a grid $x_0, x_1, \ldots, x_{N-1}$
@@ -165,7 +165,7 @@ energy spectrum $\{E_n\}$.
 """
 
 #%%
-"""
+r"""
 ## The Anharmonic Potential
 
 Now let's break the harmonic oscillator's perfect symmetry. We add a
@@ -201,7 +201,6 @@ m = 1.0
 omega = 1.0
 
 lam = 0.01                   # anharmonic coupling (for main analysis)
-lam_anim = 0.002             # smaller coupling for the animation (slow spreading)
 
 x0_displacement = 3.0        # initial displacement from center
 
@@ -230,7 +229,7 @@ print(f"  Quartic V   = {V_quart_at_x0:.2f}")
 print(f"  Ratio       = {V_quart_at_x0/V_harm_at_x0:.1%}")
 
 #%%
-"""
+r"""
 ## Comparing Potentials
 
 At the initial displacement $x_0 = 3$, the quartic correction is about 18%
@@ -269,14 +268,12 @@ plt.show()
 print(f"Grid: {Nx} points, dx = {dx:.4f}")
 
 #%%
-"""
+r"""
 ## First Look: Watching a Wave Packet Slowly Lose Its Shape
 
 Before diving into the analysis, let's *watch* what anharmonicity does.
-We'll use a very small quartic coupling ($\lambda = $`lam_anim`) — just enough
-to see the wave packet gradually spreading over 6 oscillation periods. In a
-pure harmonic potential, the packet would bounce back and forth unchanged
-forever. Here, you'll see it slowly broaden and develop ripples.
+In a pure harmonic potential, the packet would bounce back and forth unchanged
+forever. Here, you'll see it broaden and develop ripples.
 """
 
 #%%
@@ -292,7 +289,7 @@ T_kinetic = -(hbar**2 / (2 * m)) * diags(
     [-1, 0, 1], shape=(Nx, Nx), dtype=complex
 )
 
-V_anim = V_harm + lam_anim * x**4
+V_anim = V_harm + lam * x**4
 H_anim = T_kinetic + diags(V_anim + 0j, 0, shape=(Nx, Nx))
 
 # Initial coherent state
@@ -309,7 +306,7 @@ t_anim = np.linspace(0, T_anim, Nt_anim)
 max_eigenvalue_estimate = 2 * hbar**2 / (m * dx**2) + np.max(V_anim)
 max_dt = 2.0 / max_eigenvalue_estimate
 
-print(f"Animating with lambda = {lam_anim} over {T_anim/T_osc:.0f} periods...")
+print(f"Animating with lambda = {lam} over {T_anim/T_osc:.0f} periods...")
 sol_anim = solve_ivp(
     lambda t, psi: (-1j / hbar) * (H_anim @ psi),
     [0, T_anim], psi_0,
@@ -349,7 +346,7 @@ plt.close()
 HTML(anim.to_jshtml())
 
 #%%
-"""
+r"""
 ## The Energy Spectrum: Why Equal Spacing Matters
 
 Before we run the time evolution, let's look at the energy eigenvalues of
@@ -415,7 +412,7 @@ print(f"  range: [{gaps_anharm.min():.4f}, {gaps_anharm.max():.4f}]")
 print(f"  spread: {gaps_anharm.max() - gaps_anharm.min():.4f}")
 
 #%%
-"""
+r"""
 ## Time Evolution: Harmonic vs. Anharmonic
 
 Now the main event. We evolve the same initial coherent state under both
@@ -466,7 +463,7 @@ norm_h = np.sum(np.abs(sol_h.y[:, -1])**2) * dx
 print(f"\nFinal norms — harmonic: {norm_h:.10f}, anharmonic: {norm_a:.10f}")
 
 #%%
-"""
+r"""
 ## Comparing Position and Width
 
 Two diagnostics tell us the essential story:
@@ -529,7 +526,7 @@ print(f"Anharmonic width range: [{sig_a.min():.4f}, {sig_a.max():.4f}]")
 print(f"Max |position diff|:    {np.max(np.abs(x_a - x_h)):.3f}")
 
 #%%
-"""
+r"""
 ## Watching the Wave Packet Break Apart
 
 Numbers confirm the effect; now let's *see* it. Below are snapshots of
@@ -570,7 +567,7 @@ plt.tight_layout()
 plt.show()
 
 #%%
-"""
+r"""
 ## The Autocorrelation Function: Tracking Coherence
 
 The snapshots show the wave packet fragmenting, but is this a one-way process?
@@ -638,7 +635,7 @@ print(f"Anharmonic autocorrelation at T_osc: {autocorr_a[Nt//10]:.4f}")
 print(f"Anharmonic min autocorrelation: {autocorr_a.min():.4f}")
 
 #%%
-"""
+r"""
 ## Hunting for Quantum Revivals
 
 The autocorrelation is decaying, but will it come back? The theory of quantum
@@ -672,7 +669,7 @@ print(f"Estimated revival time: {T_rev:.1f} time units = {T_rev/T_osc:.1f} perio
 print(f"\nThat's a long time! Let's simulate for {int(T_rev/T_osc * 1.2)} periods to see it...")
 
 #%%
-"""
+r"""
 ## Long-Time Evolution: Seeing the Revival
 
 The revival time is about 45 periods. Let's run a longer simulation to
@@ -714,11 +711,12 @@ ax.grid(True, alpha=0.2)
 plt.tight_layout()
 plt.show()
 
+#%%
 # Find peaks in autocorrelation
 from scipy.signal import find_peaks
-peaks, props = find_peaks(autocorr_long, height=0.3, distance=10)
+peaks, props = find_peaks(autocorr_long, height=0.5, distance=10)
 if len(peaks) > 0:
-    print("\nAutocorrelation peaks above 0.3:")
+    print("\nAutocorrelation peaks above 0.5:")
     for p in peaks[:10]:
         print(f"  t = {t_long[p]/T_osc:.2f} periods, |C|^2 = {autocorr_long[p]:.4f}")
 else:
@@ -726,7 +724,13 @@ else:
     print("Highest autocorrelation after initial decay:", autocorr_long[100:].max())
 
 #%%
-"""
+# Find time of max autocorrelation after T_rev/2
+half_rev_idx = np.searchsorted(t_long, T_rev / 2)
+revival_index = np.argmax(autocorr_long[half_rev_idx:]) + half_rev_idx
+T_rev_precise = t_long[revival_index]
+print(f"\nMax autocorrelation after T_rev/2: {autocorr_long[revival_index]:.4f} at t = {T_rev_precise/T_osc: .2f} periods")
+#%%
+r"""
 ## Snapshots at Special Times
 
 Let's look at the probability density at several moments during the long
@@ -742,7 +746,7 @@ times_of_interest = {
     't = 0 (initial)': 0,
     't = 5 periods (spreading)': 5 * T_osc,
     f't = {T_rev/(2*T_osc):.0f} periods (half revival)': T_rev / 2,
-    f't = {T_rev/T_osc:.0f} periods (full revival)': T_rev,
+    f't = {T_rev_precise:.0f} periods (full revival)': T_rev_precise,
 }
 
 fig, axes = plt.subplots(len(times_of_interest), 1, figsize=(10, 10), sharex=True)
@@ -771,7 +775,7 @@ plt.tight_layout()
 plt.show()
 
 #%%
-"""
+r"""
 ## The Full Picture: Four Diagnostics
 
 Let's put position, width, energy, and autocorrelation together in one
@@ -840,7 +844,7 @@ print(f"Energy conservation: E(0) = {E_long[0]:.6f}, E(end) = {E_long[-1]:.6f}, 
       f"drift = {abs(E_long[-1]-E_long[0])/E_long[0]:.2e}")
 
 #%%
-"""
+r"""
 ## What We've Learned
 
 **The harmonic oscillator is special.** Its evenly-spaced energy levels mean

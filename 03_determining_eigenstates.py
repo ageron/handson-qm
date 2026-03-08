@@ -361,7 +361,7 @@ for i in range(M):
 
 # Print it
 print("Overlap matrix <phi_m | phi_n>:\n")
-print("     ", "".join(f"   n={j}" for j in range(M)))
+print("   ", "".join(f"     n={j}" for j in range(M)))
 for i in range(M):
     row = "".join(f" {overlap[i,j]:+7.4f}" for j in range(M))
     print(f"m={i}  {row}")
